@@ -1,16 +1,18 @@
 package com.GymApl.Controller;
 
 
-import com.GymApl.Service.UserService;
 import com.GymApl.Entity.Users;
+import com.GymApl.Service.UserService;
 import com.GymApl.dto.UserDto;
-import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.*;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/users")
@@ -26,7 +28,7 @@ public class UserController {
 
 
     @PostMapping("/create")
-    public ResponseEntity<String> createUser(@RequestBody @Valid UserDto user){
+    public ResponseEntity<String> createUser(@Validated @RequestBody UserDto user){
     userService.createUser(user);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body("Użytkownik został pomyslnie dodany");

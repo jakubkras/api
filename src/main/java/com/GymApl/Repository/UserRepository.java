@@ -6,13 +6,12 @@ import com.GymApl.Entity.Users;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.repository.CrudRepository;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Repository;
+
 import javax.sql.DataSource;
-import java.sql.*;
 import java.sql.Date;
+import java.sql.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -25,6 +24,9 @@ public class UserRepository {
 
     @Autowired
     RoleRepository roleRepository;
+
+    @Autowired
+    UserRepositoryDefault userRepositoryDefault;
 
 
     public UserRepository(DataSource dataSource) {
@@ -109,7 +111,7 @@ public class UserRepository {
         return Optional.empty();
     }
 
-public Users create(Users user) {
+/*public Users create(Users user) {
         String sql = "INSERT INTO users (id, username, password, first_name, last_name, join_date, role, enabled) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
 
     Role defaultRole = new Role();
@@ -147,6 +149,85 @@ public Users create(Users user) {
             throw new RuntimeException("Błąd podczas tworzenia użytkownika", e);
         }
         return user;
+
+    }
+*/
+public Users create(Users user) {
+    String sqlUser = "INSERT INTO users (id, username, password, first_name, last_name, join_date, role, enabled) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+    String sqlRole = "SELECT id FROM role WHERE name = ?";
+
+    try (Connection connection = dataSource.getConnection()) {
+
+        PreparedStatement roleStatement = connection.prepareStatement(sqlRole);
+        roleStatement.setString(1, EnRole.USER.name());
+        ResultSet roleResultSet = roleStatement.executeQuery();
+
+        if (roleResultSet.next()) {
+            int roleId = roleResultSet.getInt("id");
+            Role defaultRole = new Role();
+            defaultRole.setId(roleId);
+            defaultRole.setName(EnRole.USER);
+            user.setRoles(Collections.singleton(defaultRole));
+        } else {
+            throw new IllegalArgumentException("Rola USER nie istnieje w bazie danych");
+        }
+
+        String rolesString = user.getRoles().stream()
+                .map(role -> role.getName().name())
+                .collect(Collectors.joining(","));
+
+
+
+        PreparedStatement statement = connection.prepareStatement(sqlUser);
+        statement.setString(1, user.getId().toString());
+        statement.setString(2, user.getUsername());
+        statement.setString(3, passwordEncoder(user.getPassword()));
+        statement.setString(4, user.getFirst_name());
+        statement.setString(5, user.getLast_name());
+        statement.setDate(6, Date.valueOf(user.getJoin_date()));
+        statement.setString(7, rolesString);
+        statement.setBoolean(8, user.isEnabled());
+
+        int rowsAffected = statement.executeUpdate();
+        System.out.println("Rows affected: " + rowsAffected);
+
+    } catch (SQLException e) {
+        System.err.println("SQLException: " + e.getMessage());
+        System.err.println("SQLState: " + e.getSQLState());
+        System.err.println("VendorError: " + e.getErrorCode());
+        for (Throwable t : e) {
+            t.printStackTrace();
+        }
+        throw new RuntimeException("Błąd podczas tworzenia użytkownika", e);
+    }
+   usersRolesTable(user);
+
+    return user;
+}
+
+
+    public void usersRolesTable(Users user){
+        String sql = "INSERT INTO user_roles (user_id, role_id) VALUES (?, ?) ";
+
+
+        try(Connection connection= dataSource.getConnection();
+        PreparedStatement statement = connection.prepareStatement(sql)) {
+
+            for(Role role : user.getRoles()) {
+                if(role.getId()==null)
+                    throw new IllegalArgumentException("ID roli jest nieprawidlowe");
+
+                statement.setString(1, user.getId().toString());
+                statement.setInt(2, role.getId());
+                statement.addBatch();
+            }
+            statement.executeUpdate();
+
+
+        }catch (SQLException e){
+            throw new IllegalArgumentException ("Błąd podczas zapisywania ról",e);
+        }
+
     }
 
 

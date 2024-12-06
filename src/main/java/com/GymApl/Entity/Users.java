@@ -10,8 +10,6 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.LocalDate;
 import java.util.*;
@@ -38,15 +36,15 @@ public class Users {
    @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-@NotBlank(message = "Nazwa użytkownika nie może być pusta")
+@NotBlank(message = "Hasło nie może być pusta")
 @Pattern(
         regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).{8,30}$",
         message = "Hasło musi mieć od 8 do 30 znaków, musi zawierać jedną wielką literę, jedną małą i jedną cyfrę "
-)    private String username;
+)    private String password;
 
-    @NotBlank(message = "Hasło nie może być puste")
-    @Size (min = 3,max = 20, message = "Hasło musi mieć od 3 do 20 znaków")
-    private String password;
+    @NotBlank(message = "Nazwa użytkownika nie może być puste")
+    @Size (min = 3,max = 20, message = "Nazwa użytkownika musi mieć od 3 do 20 znaków")
+    private String username;
 
     @NotBlank(message = "Imie nie może być puste")
     @Pattern(regexp = "^[A-Z][a-z]*$", message = "Imie musi się zaczynać wielką literą")
@@ -63,10 +61,10 @@ public class Users {
     private List<Training> trainings = new ArrayList<>();
 
 
-   @ManyToMany(fetch = FetchType.EAGER)
-   // @JoinTable(  name = "user_roles",
-     //       joinColumns = @JoinColumn(name = "user_id"),
-       //     inverseJoinColumns = @JoinColumn(name = "role_id"))
+  @ManyToMany(fetch = FetchType.EAGER)
+  @JoinTable(  name = "user_roles",
+  joinColumns = @JoinColumn(name = "user_id"),
+          inverseJoinColumns = @JoinColumn(name = "role_id"))
     private Set<Role> roles = new HashSet<>();
 
    private boolean enabled;
