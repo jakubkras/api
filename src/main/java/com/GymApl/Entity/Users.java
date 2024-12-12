@@ -57,11 +57,11 @@ public class Users {
     private String last_name;
     private LocalDate join_date;
 
-    @OneToMany (mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany (mappedBy = "userID", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Training> trainings = new ArrayList<>();
 
 
-  @ManyToMany(fetch = FetchType.EAGER)
+  @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.ALL, CascadeType.REMOVE})
   @JoinTable(  name = "user_roles",
   joinColumns = @JoinColumn(name = "user_id"),
           inverseJoinColumns = @JoinColumn(name = "role_id"))

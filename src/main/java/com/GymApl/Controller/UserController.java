@@ -4,6 +4,7 @@ package com.GymApl.Controller;
 import com.GymApl.Entity.Users;
 import com.GymApl.Service.UserService;
 import com.GymApl.dto.UserDto;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -29,6 +30,7 @@ public class UserController {
 
     @PostMapping("/create")
     public ResponseEntity<String> createUser(@Validated @RequestBody UserDto user){
+
     userService.createUser(user);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body("Użytkownik został pomyslnie dodany");
@@ -55,7 +57,7 @@ public class UserController {
 
         try {
             userService.deleteUserById(id);
-            return ResponseEntity.status(HttpStatus.NO_CONTENT)
+            return ResponseEntity.status(HttpStatus.OK)
                     .body("User deleted successfully");
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
@@ -77,7 +79,7 @@ public class UserController {
             try {
                 user.setId(id);
                 userService.updateUser(user);
-                return ResponseEntity.status(HttpStatus.NO_CONTENT).body("Użytkownik został zaaktualizowany");
+                return ResponseEntity.status(HttpStatus.OK).body("Użytkownik został zaaktualizowany");
             } catch (IllegalArgumentException e) {
                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
             }
@@ -87,7 +89,7 @@ public class UserController {
         try{
         userService.disableUserById(id);
 
-           return ResponseEntity.status(HttpStatus.NO_CONTENT)
+           return ResponseEntity.status(HttpStatus.OK)
                    .body("User disabled successfully");
        } catch (IllegalArgumentException e) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
@@ -100,7 +102,7 @@ public class UserController {
         try{
             userService.enableUserById(id);
 
-            return ResponseEntity.status(HttpStatus.NO_CONTENT)
+            return ResponseEntity.status(HttpStatus.OK)
                     .body("User enabled successfully");
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)

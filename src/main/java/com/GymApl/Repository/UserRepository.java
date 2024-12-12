@@ -3,9 +3,13 @@ package com.GymApl.Repository;
 import com.GymApl.Entity.EnRole;
 import com.GymApl.Entity.Role;
 import com.GymApl.Entity.Users;
+import jakarta.transaction.Transactional;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
+import org.apache.tomcat.util.net.openssl.ciphers.Authentication;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Repository;
 
@@ -73,11 +77,13 @@ public class UserRepository {
 
     public Users update(Users user) {
         String sql = "UPDATE users SET username = ?, password = ? WHERE id = ?";
+
         try (Connection connection = dataSource.getConnection();
              PreparedStatement statement = connection.prepareStatement(sql)) {
 
+
             statement.setString(1, user.getUsername());
-            statement.setString(2, user.getPassword());
+            statement.setString(2, passwordEncoder(user.getPassword()));
             statement.setString(3, user.getId().toString());
 
             int updatedRows = statement.executeUpdate();
@@ -111,47 +117,7 @@ public class UserRepository {
         return Optional.empty();
     }
 
-/*public Users create(Users user) {
-        String sql = "INSERT INTO users (id, username, password, first_name, last_name, join_date, role, enabled) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
 
-    Role defaultRole = new Role();
-    defaultRole.setName(EnRole.USER);
-
-    if (user.getRoles()==null || user.getRoles().isEmpty())
-        user.setRoles(Collections.singleton(defaultRole));
-
-    String rolesString = user.getRoles().stream()
-            .map(role -> role.getName().name())
-            .collect(Collectors.joining(","));
-
-     try (Connection connection = dataSource.getConnection();
-          PreparedStatement statement = connection.prepareStatement(sql)) {
-
-
-            statement.setString(1, user.getId().toString());
-            statement.setString(2, user.getUsername());
-            statement.setString(3, passwordEncoder(user.getPassword()));
-            statement.setString(4, user.getFirst_name());
-            statement.setString(5, user.getLast_name());
-            statement.setDate(6, Date.valueOf(user.getJoin_date()));
-            statement.setString(7, rolesString);
-            statement.setBoolean(8, user.isEnabled());
-
-            int rowsAffected = statement.executeUpdate();
-            System.out.println("Rows affected: " + rowsAffected);
-        } catch (SQLException e) {
-            System.err.println("SQLException: " + e.getMessage());
-            System.err.println("SQLState: " + e.getSQLState());
-            System.err.println("VendorError: " + e.getErrorCode());
-            for (Throwable t : e) {
-                t.printStackTrace();
-            }
-            throw new RuntimeException("Błąd podczas tworzenia użytkownika", e);
-        }
-        return user;
-
-    }
-*/
 public Users create(Users user) {
     String sqlUser = "INSERT INTO users (id, username, password, first_name, last_name, join_date, role, enabled) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
     String sqlRole = "SELECT id FROM role WHERE name = ?";
@@ -232,18 +198,31 @@ public Users create(Users user) {
 
 
     public void deleteById(UUID id){
-       String sql = "Delete from users WHERE id= ?";
+       String sqlUserTbl = "Delete from users WHERE id= ?";
+       String sqlUserRolesTbl = "Delete from user_roles WHERE user_id= ?";
 
-        try(Connection connection = dataSource.getConnection();
-        PreparedStatement statement = connection.prepareStatement(sql)){
-            statement.setString(1,id.toString());
-            statement.executeUpdate();
 
-        }catch (SQLException e){
+       try (Connection connection = dataSource.getConnection()){
+
+
+           try(PreparedStatement statement1 = connection.prepareStatement(sqlUserRolesTbl)) {
+               statement1.setString(1, id.toString());
+               statement1.executeUpdate();
+
+
+               try (PreparedStatement statement = connection.prepareStatement(sqlUserTbl)) {
+                   statement.setString(1, id.toString());
+
+                   statement.executeUpdate();
+
+               }
+           }
+
+        } catch (SQLException e) {
             e.printStackTrace();
+            throw new RuntimeException("Błąd podczas usuwania użytkownika: " + e.getMessage(), e);
         }
-
-    }
+}
 
     //passwordEncoder
     public @NotBlank(message = "Hasło nie może być puste") @Size(min = 3, max = 20, message = "Hasło musi mieć od 3 do 20 znaków") String passwordEncoder(String password){

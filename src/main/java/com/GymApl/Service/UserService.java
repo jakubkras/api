@@ -5,6 +5,7 @@ import com.GymApl.Repository.UserRepository;
 import com.GymApl.Entity.Users;
 import com.GymApl.Repository.UserRepositoryDefault;
 import com.GymApl.dto.UserDto;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -53,10 +54,20 @@ public class UserService {
         Users existingUser = existingUserOpt.get();
 
         if (user.getUsername() != null && !user.getUsername().isEmpty()) {
-            existingUser.setUsername(user.getUsername());
+        String username = user.getUsername();
+        if (username.length() <3 || username.length()>20){
+            throw new IllegalArgumentException("Nazwa użytkownika ma mieć od 3 do 20 znaków");
+        }
+            existingUser.setUsername(username);
         }
         if (user.getPassword() != null && !user.getPassword().isEmpty()) {
-        existingUser.setPassword(user.getPassword());
+
+            String password = user.getPassword();
+            if (!password.matches("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).{8,30}$")) {
+                throw new IllegalArgumentException("Hasło musi mieć od 8 do 30 znaków, musi zawierać jedną wielką literę, jedną małą literę i jedną cyfrę.");
+            }
+
+            existingUser.setPassword(password);
     }
         userRepository.update(existingUser);
         return existingUser;
@@ -80,13 +91,14 @@ public class UserService {
         if(user.isEmpty()){
             throw new IllegalArgumentException("Użytkownik z takim id nie istnieje");
         }
+
         userRepository.deleteById(id);
 
     }
 
 
     public void disableUserById(UUID id){
-        Optional<Users> userOptional = userRepository.findById(id);
+        Optional<Users> userOptional = userRepositoryDefault.findById(id);
 
         if(userOptional.isEmpty()){
             throw new IllegalArgumentException("Użytkownik z takim id nie istnieje");
@@ -94,8 +106,8 @@ public class UserService {
         Users user = userOptional.get();
 
             user.setEnabled(false);
-         userRepositoryDefault.save(user);
-        userRepository.disable(id);
+           // userRepositoryDefault.save(user);
+            userRepository.disable(id);
 
     }
 
@@ -108,7 +120,7 @@ public class UserService {
         Users user = userOptional.get();
 
         user.setEnabled(true);
-        userRepositoryDefault.save(user);
+        //userRepositoryDefault.save(user);
         userRepository.enable(id);
 
     }
