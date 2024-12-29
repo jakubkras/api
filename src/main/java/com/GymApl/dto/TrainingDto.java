@@ -12,12 +12,11 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 @Data
 @AllArgsConstructor
-@Setter
-@Getter
 public class TrainingDto {
 
     private String typeOfWorkout;
@@ -27,6 +26,8 @@ public class TrainingDto {
     private LocalDateTime date;
 
     private UUID userID;
+
+    private List<ExerciseDto> exercises;
 
 
 }

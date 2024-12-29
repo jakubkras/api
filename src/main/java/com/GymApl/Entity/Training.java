@@ -37,6 +37,9 @@ public class Training {
     @OneToMany (mappedBy = "training", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Exercise> exercises = new ArrayList<>();
 
+    @OneToMany (mappedBy = "training", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<SetDetails> setDetails = new ArrayList<>();
+
 @PrePersist
     public  void prePersist(){
         this.trainingNumber = lastTrainingNumber + 1;

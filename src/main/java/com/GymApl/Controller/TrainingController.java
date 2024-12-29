@@ -1,8 +1,11 @@
 package com.GymApl.Controller;
 
 import com.GymApl.Entity.Exercise;
+import com.GymApl.Entity.SetDetails;
 import com.GymApl.Entity.Training;
 import com.GymApl.Service.TrainingService;
+import com.GymApl.dto.CreateTrainingRequest;
+import com.GymApl.dto.SetDetailsDto;
 import com.GymApl.dto.TrainingDto;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,9 +25,8 @@ public class TrainingController {
     TrainingService trainingService;
 
     @PostMapping("/create")
-    public ResponseEntity<String> createTraining(@RequestBody TrainingDto trainingDto,
-                                         @RequestParam(required = false)List<Exercise> exercises){
-        trainingService.createTraining(trainingDto, exercises);
+    public ResponseEntity<String> createTraining(@RequestBody CreateTrainingRequest request) {
+        trainingService.createTraining(request.getTypeOfWorkout(), request.getSetDetailsList(), request.getExerciseNames());
         return ResponseEntity.status(HttpStatus.CREATED).body("Dodano pomyslnie trening");
 
     }
@@ -35,7 +37,11 @@ public class TrainingController {
         List<TrainingDto> trainings= trainingService.findAllTrainings();
         return ResponseEntity.ok(trainings);
     }
-
+    @DeleteMapping("/delete")
+    public ResponseEntity<String> deleteTraining (@RequestParam String typeOfWorkout){
+       trainingService.deleteTraining(typeOfWorkout);
+        return  ResponseEntity.ok("Pomyslnie usunieto trening o nazwie: "+typeOfWorkout);
+    }
 
 
 }
