@@ -1,6 +1,7 @@
 package com.GymApl.Service;
 
 import com.GymApl.Entity.Exercise;
+<<<<<<< HEAD
 import com.GymApl.Entity.SetDetails;
 import com.GymApl.Entity.Training;
 import com.GymApl.Entity.Users;
@@ -13,6 +14,14 @@ import com.GymApl.dto.ExerciseDto;
 import com.GymApl.dto.SetDetailsDto;
 import com.GymApl.dto.TrainingDto;
 import jakarta.transaction.Transactional;
+=======
+import com.GymApl.Entity.Training;
+import com.GymApl.Entity.Users;
+import com.GymApl.Repository.TrainingRepository;
+import com.GymApl.Repository.UserRepositoryDefault;
+import com.GymApl.Security.UserDetailsImplementation;
+import com.GymApl.dto.TrainingDto;
+>>>>>>> 60e89f6e638fe239bb7480a1d9640befd274e2f5
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
@@ -20,7 +29,10 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+<<<<<<< HEAD
 import java.util.ArrayList;
+=======
+>>>>>>> 60e89f6e638fe239bb7480a1d9640befd274e2f5
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -36,6 +48,7 @@ public class TrainingService {
     @Autowired
     private final UserRepositoryDefault userRepository;
 
+<<<<<<< HEAD
     @Autowired
     SetDetailsRepository setDetailsRepository;
 
@@ -59,14 +72,26 @@ public class TrainingService {
         if (exerciseNames == null) {
             throw new IllegalArgumentException("Lista nazw ćwiczeń nie może być pusta.");
         }
+=======
+    public Training createTraining(TrainingDto trainingDto, List<Exercise> exercises) {
+
+>>>>>>> 60e89f6e638fe239bb7480a1d9640befd274e2f5
 
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
         if (principal instanceof UserDetailsImplementation) {
             UserDetailsImplementation userDetails = (UserDetailsImplementation) principal;
+<<<<<<< HEAD
             String currentUser = userDetails.getId().toString();
 
             Optional<Users> userOptional = userRepository.findById(UUID.fromString(currentUser));
+=======
+
+            String currentUser = userDetails.getId().toString();
+
+            Optional<Users> userOptional = userRepository.findById(UUID.fromString(currentUser));
+
+>>>>>>> 60e89f6e638fe239bb7480a1d9640befd274e2f5
             if (userOptional.isEmpty()) {
                 throw new IllegalArgumentException("Nie znaleziono użytkownika o takim id: " + currentUser);
             }
@@ -76,6 +101,7 @@ public class TrainingService {
             Users user = userOptional.get();
 
             Training training = new Training();
+<<<<<<< HEAD
             training.setLastTrainingNumber(lastTraining != null ? lastTraining.getLastTrainingNumber() : 0);
             training.setTrainingNumber(training.getTrainingNumber());
             training.setDate(LocalDateTime.now().withNano(0).withSecond(0));
@@ -117,12 +143,34 @@ public class TrainingService {
 
             return training;
 
+=======
+
+            if (lastTraining != null) {
+                training.setLastTrainingNumber(lastTraining.getTrainingNumber());
+            } else {
+                training.setLastTrainingNumber(0);
+            }
+
+            training.setTrainingNumber(training.getTrainingNumber());
+            training.setDate(LocalDateTime.now().withNano(0).withSecond(0));
+            training.setTypeOfWorkout(trainingDto.getTypeOfWorkout());
+            training.setUserID(user);
+
+            if (exercises != null) {
+                training.setExercises(exercises);
+            }
+
+            return trainingRepository.save(training);
+>>>>>>> 60e89f6e638fe239bb7480a1d9640befd274e2f5
         } else {
             throw new IllegalStateException("Brak zalogowanego użytkownika.");
         }
     }
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> 60e89f6e638fe239bb7480a1d9640befd274e2f5
     public List<TrainingDto> findAllTrainings (){
         String userID;
        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -136,6 +184,7 @@ public class TrainingService {
 
         List<Training> trainings = trainingRepository.findByUserID_Id(UUID.fromString(userID));
 
+<<<<<<< HEAD
        return trainings.stream().map(training -> {
            List<ExerciseDto> exerciseDtos = training.getExercises().stream().map(
 
@@ -228,3 +277,13 @@ throw new IllegalArgumentException("Trening o nazwie: "+ typeOfWorkout + " nie i
 }
 
 
+=======
+   return trainings.stream().map(training -> new TrainingDto(training.getTypeOfWorkout(),
+                training.getTrainingNumber(), training.getDate(), training.getUserID().getId())).collect(Collectors.toList());
+
+    }
+
+
+
+}
+>>>>>>> 60e89f6e638fe239bb7480a1d9640befd274e2f5

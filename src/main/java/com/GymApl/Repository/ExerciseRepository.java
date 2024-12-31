@@ -4,6 +4,7 @@ import com.GymApl.Entity.Exercise;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+<<<<<<< HEAD
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -20,5 +21,11 @@ public interface ExerciseRepository extends JpaRepository<Exercise, Integer> {
     Optional<Exercise> findByName (String name);
 
 
+=======
+@Repository
+public interface ExerciseRepository extends JpaRepository<Exercise, Integer> {
+    Exercise findByName (String name);
+    void deleteByName (String name);
+>>>>>>> 60e89f6e638fe239bb7480a1d9640befd274e2f5
 
 }
