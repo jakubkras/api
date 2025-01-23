@@ -1,0 +1,27 @@
+services:
+  postgres:
+    container_name: postgres-db
+    image: postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: GymData
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres:/var/lib/data
+    networks:
+      - spring-boot-network
+  spring-boot:
+    container_name: spring
+    image: spring
+    ports:
+    - "8080:8080"
+    networks:
+      - spring-boot-network
+volumes:
+  postgres:
+networks:
+  spring-boot-network:
+    driver: bridge
+
